@@ -57,7 +57,7 @@ foreach ( $scan_info as $plugin ) {
 	if ( get_http_response_code( $api_url ) != "200" ){
 		$result = false;
 	} else {
-		$result = json_decode( $api_url );
+		$result = json_decode( file_get_contents( $api_url ) );
 	}
 
 	if ( $result ) {
