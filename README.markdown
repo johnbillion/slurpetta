@@ -21,28 +21,35 @@ Requirements
 Instructions
 ------------
 
-1. `cd slurpetta`
-2. `./update`
+Run this from within the `slurpetta` directory:
+
+```
+./update
+```
 
 The `plugins/` directory will contain all the plugins when the script is done.
 
-Run `./update help` for more options.
+For more options, run:
+
+```
+./update help
+```
 
 ### Scanning the repo
 
-You can use
-[`ack`](https://beyondgrep.com/)
-or
-[`ag`](https://github.com/ggreer/the_silver_searcher)
-to scan the plugins repository.  See also the
-[plugins directory maintenance](https://make.wordpress.org/plugins/handbook/directory-maintenance/#scanning-the-repository)
-documentation page.
+You'll likely have the best experience using [ripgrep](https://github.com/BurntSushi/ripgrep) to search for files. It's available via package managers for macOS, Linux, and Windows, and it's just about the fastest tool available for regex searching across a large number of files.
+
+Examples:
+
+```
+rg --type php 'rest_get_date_with_gmt' plugins
+```
 
 This repository also includes a script to show a summary of a scan.  For example:
 
 ```sh
-$ ag --php --skip-vcs-ignores rest_get_date_with_gmt | tee scans/rest_get_date_with_gmt.txt
-$ ./summarize-scan.php scans/rest_get_date_with_gmt.txt
+rg --type php 'rest_get_date_with_gmt' plugins | tee scans/rest_get_date_with_gmt.txt
+./summarize-scan.php scans/rest_get_date_with_gmt.txt
 ```
 
 ```
