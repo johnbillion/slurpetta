@@ -26,7 +26,7 @@ function get_http_response_code( $url ) {
 }
 
 while ( ( $line = fgets( $handle ) ) !== false ) {
-	if ( preg_match( '#^(plugins/)?([^/]+)/#', $line, $match ) ) {
+	if ( preg_match( '#^(plugins/[^/]/)?([^/]+)/#', $line, $match ) ) {
 		$plugin = $match[2];
 		if ( $plugin !== $current_plugin ) {
 			save_current_plugin_info();
