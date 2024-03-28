@@ -29,12 +29,6 @@ Run this from within the `slurpetta` directory:
 
 The `plugins/` directory will contain all the plugins when the script is done.
 
-For more options, run:
-
-```
-./update help
-```
-
 ### Scanning the repo
 
 You'll likely have the best experience using [ripgrep](https://github.com/BurntSushi/ripgrep) to search for files. It's available via package managers for macOS, Linux, and Windows, and it's just about the fastest tool available for regex searching across a large number of files.

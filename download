@@ -25,17 +25,6 @@ if ( ! isset( $args[1] ) || ! $args[1] ) {
 $plugin = $args[1];
 
 switch ( $type ) {
-	case 'readme':
-		$download_path = sprintf(
-			'readmes/%s.readme',
-			$plugin
-		);
-		$download_url = sprintf(
-			'https://plugins.svn.wordpress.org/%s/trunk/readme.txt',
-			$plugin
-		);
-		break;
-
 	case 'all':
 		$download_path = sprintf(
 			'zips/%s.zip',

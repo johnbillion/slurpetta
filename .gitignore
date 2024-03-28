@@ -1,7 +1,5 @@
 plugins/
 !plugins/README.md
-readmes/
-!readmes/README.md
 scans/
 !scans/README.md
 zips/
