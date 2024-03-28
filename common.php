@@ -2,28 +2,33 @@
 
 require_once 'formatting.php';
 
-function fetch_popular_plugin_slugs( $minimum_active_installs = 10000 ) {
-	// The maximum number of plugins per page is 250.
-	$url = 'https://api.wordpress.org/plugins/info/1.2/?action=query_plugins&request[per_page]=250&request[page]=%d';
+function fetch_popular_slugs( $type = 'plugins', $minimum_active_installs = 10000 ) {
+	// The maximum number of results per page is 250.
+	$url = 'https://api.wordpress.org/%1$s/info/1.2/?action=query_%1$s&request[browse]=popular&request[fields][active_installs]=1&request[per_page]=250&request[page]=%2$d';
 	$page = 1;
 	$pages = 1;
-	$plugins = [];
+	$assets = [];
 
 	do {
 		echo "Page {$page}...\n";
 
-		$data = json_decode( file_get_contents( sprintf( $url, $page ) ) );
+		$data = json_decode( file_get_contents( sprintf( $url, $type, $page ) ), true );
 		if ( ! $data ) {
-			throw new Exception( 'Failed to download plugins list.' );
+			throw new Exception(
+				sprintf(
+					'Failed to download %s list.',
+					$type
+				)
+			);
 		}
 
-		$pages = $data->info->pages;
+		$pages = $data['info']['pages'];
 
-		foreach ( $data->plugins as $plugin ) {
-			if ( $plugin->active_installs >= $minimum_active_installs ) {
-				$plugins[] = $plugin->slug;
+		foreach ( $data[ $type ] as $result ) {
+			if ( $result['active_installs'] >= $minimum_active_installs ) {
+				$assets[] = $result['slug'];
 			} else {
-				// The plugins are approximately sorted by active installs, so we can stop after this page of results.
+				// The results are approximately sorted by active installs, so we can stop after this page of results.
 				$page = $pages;
 			}
 		}
@@ -31,9 +36,9 @@ function fetch_popular_plugin_slugs( $minimum_active_installs = 10000 ) {
 		$page++;
 	} while ( $page <= $pages );
 
-	sort( $plugins );
+	sort( $assets );
 
-	return $plugins;
+	return $assets;
 }
 
 function get_directory_by_type( $type ) {

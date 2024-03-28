@@ -1,5 +1,5 @@
-WordPress Popular Plugin Slurper
-==================================
+Slurpetta
+=========
 
 A command line PHP script that downloads and updates a copy of the latest stable
 version of every plugin in the [WordPress.org plugin directory][repo] with at
@@ -27,7 +27,7 @@ Run this from within the `slurpetta` directory:
 ./update
 ```
 
-The `plugins/` directory will contain all the plugins when the script is done.
+The `plugins` and `themes` directories will contain all the plugins and themes when the script is done.
 
 ### Scanning the repo
 
@@ -65,13 +65,6 @@ FAQ
 An SVN checkout of the entire repository is a BEAST of a thing. You don't want it,
 trust me. Updates and cleanups can take **hours** or even **days** to complete.
 
-### Why not just do an SVN export of each plugin's trunk?
-
-There is no guarantee that the plugin's trunk is the latest stable version. The
-repository supports doing development in trunk, and designating a branch or tag
-as the stable version. Using the zip file gets around this, as it figures it all
-out and gives you the latest stable version.
-
 ### How long will it take?
 
 Your first update will take a while but depends entirely on your connection and
@@ -92,8 +85,9 @@ which when unpacked will use around 12 GB of disk space.
 
 ### Something went wrong, how do I do a partial update?
 
-The last successful update revision number is stored in `plugins/.last-revision`.
-You can just overwrite that and the next `update` will start after that revision.
+The last successful update revision numbers are stored in `plugins/.last-revision`.
+and `themes/.last-revision`. You can just overwrite one of those and the next `update`
+will start after that revision.
 
 ### What is this thing actually doing to my computer?
 

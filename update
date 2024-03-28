@@ -45,7 +45,7 @@ try {
 
 $svn_last_revision = (int) $matches[1];
 
-echo "Most recent SVN revision : $svn_last_revision\n";
+echo "Most recent plugin SVN revision : $svn_last_revision\n";
 $last_revision = read_last_revision( $type );
 
 $start_time = time();
@@ -195,7 +195,7 @@ if ( $last_revision === $svn_last_revision ) {
 		}
 	}
 
-	$popular_plugins = fetch_popular_plugin_slugs( $minimum_active_installs );
+	$popular_plugins = fetch_popular_slugs( 'plugins', $minimum_active_installs );
 	$plugins_ordered = array_intersect(
 		array_keys( $plugins_ordered ),
 		$popular_plugins
@@ -223,7 +223,7 @@ if ( $last_revision === $svn_last_revision ) {
 
 	echo "Fetching list of plugins with {$minimum_active_installs} or more active installations...\n";
 
-	$plugins = fetch_popular_plugin_slugs( $minimum_active_installs );
+	$plugins = fetch_popular_slugs( 'plugins', $minimum_active_installs );
 
 	printf(
 		"%d plugins to download\n",
