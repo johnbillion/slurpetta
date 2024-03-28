@@ -95,12 +95,32 @@ if ( $return === 0 && file_exists( $download_path ) ) {
 			die();
 		}
 
-		if ( file_exists( 'plugins/' . $plugin ) ) {
-			exec( 'rm -rf ' . escapeshellarg( 'plugins/' . $plugin ) );
+		$initial = $plugin[0];
+		$filename = "plugins/{$initial}/{$plugin}";
+
+		if ( file_exists( $filename ) ) {
+			exec(
+				sprintf(
+					'rm -rf %s',
+					escapeshellarg( $filename )
+				)
+			);
 		}
 
-		exec( 'unzip -o -d plugins ' . escapeshellarg( $download_path ) );
-		exec( 'rm -rf ' . escapeshellarg( $download_path ) );
+		exec(
+			sprintf(
+				'unzip -o -d plugins/%s %s',
+				escapeshellarg( $initial ),
+				escapeshellarg( $download_path )
+			)
+		);
+
+		exec(
+			sprintf(
+				'rm -rf %s',
+				escapeshellarg( $download_path )
+			)
+		);
 
 		flock( $unzip_lock, LOCK_UN );
 		fclose( $unzip_lock );

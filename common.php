@@ -2,6 +2,40 @@
 
 require_once 'formatting.php';
 
+function fetch_popular_plugin_slugs( $minimum_active_installs = 10000 ) {
+	// The maximum number of plugins per page is 250.
+	$url = 'https://api.wordpress.org/plugins/info/1.2/?action=query_plugins&request[per_page]=250&request[page]=%d';
+	$page = 1;
+	$pages = 1;
+	$plugins = [];
+
+	do {
+		echo "Page {$page}...\n";
+
+		$data = json_decode( file_get_contents( sprintf( $url, $page ) ) );
+		if ( ! $data ) {
+			throw new Exception( 'Failed to download plugins list.' );
+		}
+
+		$pages = $data->info->pages;
+
+		foreach ( $data->plugins as $plugin ) {
+			if ( $plugin->active_installs >= $minimum_active_installs ) {
+				$plugins[] = $plugin->slug;
+			} else {
+				// The plugins are approximately sorted by active installs, so we can stop after this page of results.
+				$page = $pages;
+			}
+		}
+
+		$page++;
+	} while ( $page <= $pages );
+
+	sort( $plugins );
+
+	return $plugins;
+}
+
 function get_directory_by_type( $type ) {
 	switch ( $type ) {
 		case 'readme':

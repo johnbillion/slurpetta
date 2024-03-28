@@ -2,11 +2,12 @@ WordPress Plugin Directory Slurper
 ==================================
 
 A command line PHP script that downloads and updates a copy of the latest stable
-version of every plugin in the [WordPress.org plugin repository][repo].
+version of every plugin in the [WordPress.org plugin directory][repo] with at
+least 10,000 active installations. As of March 2024 this is around 2,500 plugins.
 
-Really handy for doing local searches across all WordPress plugins.
+Really handy for doing local searches across popular WordPress plugins.
 
-[repo]: http://wordpress.org/extend/plugins/
+[repo]: http://wordpress.org/plugins/
 
 Requirements
 ------------
@@ -15,14 +16,10 @@ Requirements
 * PHP 5.2 or higher
 * `wget` and `svn` command-line executables installed
 
-A Windows/Unix compatible version of this project that has comparable
-performance (if you can use cURL and PHP's pThreads) is available
-[here](https://github.com/chriscct7/WordPress-Plugin-Directory-Slurper).
-
 Instructions
 ------------
 
-1. `cd WordPress-Plugin-Directory-Slurper`
+1. `cd slurpetta`
 2. `./update`
 
 The `plugins/` directory will contain all the plugins when the script is done.
@@ -74,8 +71,10 @@ out and gives you the latest stable version.
 
 ### How long will it take?
 
-Your first update will take a while (at least a couple of hours, and
-potentially overnight, depending on your connection and disk speeds).
+Your first update will take a while but depends entirely on your connection and
+disk speeds. On a fast modern machine with a fast internet connection it may take
+as little as ten minutes, but be prepared for it to take hours on a machine with
+a slower connection or disk speeds.
 
 But subsequent updates are smarter. The script tracks the SVN revision number
 of your latest update and then asks the plugins SVN repository for a list of
@@ -84,9 +83,9 @@ the initial sync.
 
 ### How much disk space do I need?
 
-As of December 2017, the plugin repository contains over 70,000 plugins. The
-script will download around 20 GB of zip files which, when unpacked, will use
-around 45 GB of disk space.
+As of March 2024 the plugin repository contains over 100,000 plugins. The
+script will download just those with more than 10,000 active installations
+which when unpacked will use around 12 GB of disk space.
 
 ### Something went wrong, how do I do a partial update?
 
@@ -104,7 +103,7 @@ watch -n .5 "pstree -pa `pgrep -f '^xargs -n 1 -P .+ ./download'`"
 
 Copyright & License
 -------------------
-Copyright (C) 2011 Mark Jaquith
+Copyright (C) 2011 Mark Jaquith, 2024 John Blackbourn
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License

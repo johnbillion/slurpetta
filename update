@@ -5,6 +5,7 @@ $cmd = array_shift( $args );
 
 chdir( dirname( __FILE__ ) );
 
+$limit = 10000;
 $type = 'all';
 if ( ! empty( $args[0] ) ) {
 	$type = $args[0];
@@ -201,12 +202,17 @@ if ( $last_revision === $svn_last_revision ) {
 			$plugins_ordered[ $plugin ] = true;
 		}
 	}
-	$plugins_ordered = array_keys( $plugins_ordered );
+
+	$popular_plugins = fetch_popular_plugin_slugs( $limit );
+	$plugins_ordered = array_intersect(
+		array_keys( $plugins_ordered ),
+		$popular_plugins
+	);
 
 	printf(
 		"%d plugin%s to update (%d SVN revision%s)\n",
-		count( $plugins ),
-		( count( $plugins ) === 1 ? '' : 's' ),
+		count( $plugins_ordered ),
+		( count( $plugins_ordered ) === 1 ? '' : 's' ),
 		count( $revisions ),
 		( count( $revisions ) === 1 ? '' : 's' )
 	);
@@ -223,14 +229,9 @@ if ( $last_revision === $svn_last_revision ) {
 	echo "Settle in.  This will take a while.\n";
 	echo "\n";
 
-	echo "Fetching list of all plugins...\n";
-	$plugins = file_get_contents( 'https://plugins.svn.wordpress.org/' );
-	if ( ! $plugins ) {
-		// Something went wrong; there should be a warning message above
-		throw new Exception( 'Failed to download plugins list.' );
-	}
-	preg_match_all( '#<li><a href="([^/]+)/">([^/]+)/</a></li>#', $plugins, $matches );
-	$plugins = $matches[1];
+	echo "Fetching list of plugins with {$limit} or more active installations...\n";
+
+	$plugins = fetch_popular_plugin_slugs( $limit );
 
 	printf(
 		"%d plugins to download\n",
