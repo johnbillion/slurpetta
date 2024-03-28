@@ -3,10 +3,11 @@ WordPress Popular Plugin Slurper
 
 A command line PHP script that downloads and updates a copy of the latest stable
 version of every plugin in the [WordPress.org plugin directory][repo] with at
-least 10,000 active installations. As of March 2024 this is around 2,500 plugins.
+least 10,000 active installations. As of March 2024 this is **around 2,500 plugins**.
+Slurping and updating just these plugins is at least 20x faster and smaller than
+slurping the entire plugin directory.
 
-Really handy for doing local searches across popular WordPress plugins and at
-least 20x faster and smaller than slurping the entire plugin directory.
+Really handy for doing local searches across popular WordPress plugins.
 
 [repo]: http://wordpress.org/plugins/
 
@@ -102,7 +103,8 @@ tasks being executed by this tool:
 watch -n .5 "pstree -pa `pgrep -f '^xargs -n 1 -P .+ ./download'`"
 ```
 
-### Many thanks
+Many thanks
+-----------
 
 This is an adaptation of [the WordPress Plugin Directory Slurper](https://github.com/markjaquith/WordPress-Plugin-Directory-Slurper) by Mark Jaquith. The majority of the code was written by Mark and the other contributors to that library. If you need the entire plugin directory rather than just those with at least 10,000 active installations, then use that instead.
 
