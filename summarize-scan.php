@@ -6,12 +6,17 @@ $handle = fopen( $argv[1], 'r' ) or die;
 $scan_info = array(
 	'plugins' => array(),
 	'themes'  => array(),
+	'core'  => array(),
 );
 $max_name_length = 0;
 
 $install_types = [
 	'plugins' => explode( "\n", @file_get_contents( 'plugins/.active_installs' ) ?: [] ),
 	'themes' => explode( "\n", @file_get_contents( 'themes/.active_installs' ) ?: [] ),
+	'core' => [
+		'latest,0',
+		'nightly,0',
+	]
 ];
 $all_active_installs = array();
 
@@ -39,6 +44,8 @@ function save_current_info( string $type, string $slug ) {
 while ( ( $line = fgets( $handle ) ) !== false ) {
 	if ( preg_match( '#^([^/]+)/[^/]/([^/]+)/#', $line, $match ) ) {
 		save_current_info( $match[1], $match[2] );
+	} elseif ( preg_match( '#^core/([^/]+)/#', $line, $match ) ) {
+		save_current_info( 'core', $match[1] );
 	}
 }
 
@@ -60,8 +67,8 @@ foreach ( $scan_info as $type => $items ) {
 		continue;
 	}
 
-	echo 'Matches  ' . str_pad( 'Slug', $max_name_length - 3 ) . "Active installs\n";
-	echo '=======  ' . str_pad( '====', $max_name_length - 3 ) . "===============\n";
+	echo 'Matches  ' . str_pad( 'Slug', $max_name_length - 1 ) . "Active installs\n";
+	echo '=======  ' . str_pad( '====', $max_name_length - 1 ) . "===============\n";
 
 	foreach ( $items as $slug => $item ) {
 		$result = $item['installs'] ?: null;
@@ -72,7 +79,7 @@ foreach ( $scan_info as $type => $items ) {
 				9, ' ', STR_PAD_LEFT
 			) . '+';
 		} else {
-			$active_installs = '   REMOVED';
+			$active_installs = '   Unknown';
 		}
 		echo str_pad( $item['matches'], 7, ' ', STR_PAD_LEFT )
 			. '  '

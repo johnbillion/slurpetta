@@ -6,7 +6,7 @@ version of:
 
 * Every plugin in the [WordPress.org plugin directory](https://wordpress.org/plugins/) with at least 10,000 active installations
 * Every theme in the [WordPress.org theme directory](https://wordpress.org/themes/) with at least 1,000 active installations
-* WordPress core latest release and latest nightly
+* WordPress core latest and nightly
 
 As of March 2024 this is **around 2,500 plugins** and **700** themes.
 
