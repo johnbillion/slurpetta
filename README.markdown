@@ -36,7 +36,9 @@ Run this from within the `slurpetta` directory:
 The `plugins` and `themes` directories will contain all the plugins and themes when the script is done.
 The `core` directory will contain the latest release of WordPress core.
 
-### Scanning the repo
+### Scanning the results
+
+#### Simple scanning
 
 You'll likely have the best experience using [ripgrep](https://github.com/BurntSushi/ripgrep) to search for files. It's available via package managers for macOS, Linux, and Windows, and it's just about the fastest tool available for regex searching across a large number of files.
 
@@ -58,6 +60,9 @@ Examples:
 ```sh
 semgrep -e 'printf(esc_attr__(...), ...)' --lang=php --no-git-ignore plugins
 ```
+
+
+#### Generating scan summaries
 
 This repository also includes a script to show a summary of a scan.  For example:
 
@@ -136,11 +141,11 @@ watch -n .5 "pstree -pa `pgrep -f '^xargs -n 1 -P .+ ./download'`"
 Many thanks
 -----------
 
-This is an adaptation of [the WordPress Plugin Directory Slurper](https://github.com/markjaquith/WordPress-Plugin-Directory-Slurper) by Mark Jaquith. The majority of the code was written by Mark and the other contributors to that library. If you need the entire plugin directory rather than just those with at least 10,000 active installations, then use that instead.
+This is an adaptation of [the WordPress Plugin Directory Slurper](https://github.com/markjaquith/WordPress-Plugin-Directory-Slurper) by Mark Jaquith. The majority of the code was originally written by Mark and the other contributors to that library. If you need the entire plugin directory rather than just those with at least 10,000 active installations, then use that instead.
 
 Copyright & License
 -------------------
-Copyright (C) 2011 Mark Jaquith, 2024 John Blackbourn
+Copyright &copy; 2011-2020 Mark Jaquith, 2024 John Blackbourn
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
