@@ -184,6 +184,7 @@ if ( $last_revision === $svn_last_revision ) {
 	}
 	echo "\n";
 
+	sleep(1);
 	$status = proc_get_status( $svn );
 	if ( $status['running'] ) {
 		throw new Exception(
