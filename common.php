@@ -1,8 +1,8 @@
-<?php
+<?php declare( strict_types = 1 );
 
 require_once 'formatting.php';
 
-function fetch_popular_slugs( string $type, int $minimum_active_installs ) {
+function fetch_popular_slugs( string $type, int $minimum_active_installs ): array {
 	// The maximum number of results per page is 250.
 	$url = 'https://api.wordpress.org/%1$s/info/1.2/?action=query_%1$s&request[browse]=popular&request[fields][active_installs]=1&request[per_page]=250&request[page]=%2$d';
 	$page = 1;
@@ -55,7 +55,7 @@ function fetch_popular_slugs( string $type, int $minimum_active_installs ) {
 	return array_keys( $assets );
 }
 
-function read_last_revision( $type ) {
+function read_last_revision( string $type ): int {
 	if ( file_exists( $type . '/.last-revision' ) ) {
 		return (int) file_get_contents( $type . '/.last-revision' );
 	} else {
@@ -63,23 +63,14 @@ function read_last_revision( $type ) {
 	}
 }
 
-function write_last_revision( $type, $revision ) {
+function write_last_revision( string $type, int $revision ): void {
 	file_put_contents(
 		$type . '/.last-revision',
 		"$revision\n"
 	);
 }
 
-function download( $type, $slugs, $is_partial_sync ) {
-	try {
-		return download_internal( $type, $slugs, $is_partial_sync );
-	} catch ( Exception $e ) {
-		echo $e->getMessage() . "\n";
-		exit( 1 );
-	}
-}
-
-function download_internal( $type, $slugs, $is_partial_sync ) {
+function download( string $type, array $slugs, bool $is_partial_sync ): array {
 	// Number of simultaneous downloads
 	global $parallel;
 

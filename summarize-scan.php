@@ -1,5 +1,5 @@
 #!/usr/bin/env php
-<?php
+<?php declare( strict_types = 1 );
 
 $handle = fopen( $argv[1], 'r' ) or die;
 

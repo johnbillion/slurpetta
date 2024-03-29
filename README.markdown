@@ -4,8 +4,8 @@ Slurpetta
 A command line PHP script that downloads and updates a copy of the latest stable
 version of:
 
-* Every plugin in the [WordPress.org plugin directory](https://wordpress.org/plugins/) with at least 10,000 active installations
-* Every theme in the [WordPress.org theme directory](https://wordpress.org/themes/) with at least 1,000 active installations
+* Every plugin in the WordPress.org directory with at least 10,000 active installations
+* Every theme in the WordPress.org directory with at least 1,000 active installations
 * WordPress core latest and nightly
 
 As of March 2024 this is **around 2,500 plugins** and **700** themes.
@@ -19,7 +19,7 @@ Requirements
 ------------
 
 * Unix system (tested on Mac OS X and Linux)
-* PHP 5.2 or higher
+* PHP 8.0 or higher
 * `wget` and `svn` command-line executables installed
 
 Instructions
@@ -42,8 +42,21 @@ You'll likely have the best experience using [ripgrep](https://github.com/BurntS
 
 Examples:
 
-```
+```sh
 rg --type php 'rest_get_date_with_gmt' plugins
+```
+
+
+#### Advanced scanning
+
+It's possible to perform more powerful searches that are aware of language syntax and semantics using [Semgrep](https://github.com/semgrep/semgrep). It's available via package managers or via Docker. You don't need to sign into the Semgrep Code service on the CLI despite what its documentation says.
+
+Semgrep is substantially slower than ripgrep but it allows you to perform searches using [its language-aware pattern syntax](https://semgrep.dev/docs/writing-rules/pattern-syntax/). Benefits include ignoring code comments and being aware of multi-line matches because it's aware of the semantics of the code beyond simple static analysis.
+
+Examples:
+
+```sh
+semgrep -e 'printf(esc_attr__(...), ...)' --lang=php --no-git-ignore plugins
 ```
 
 This repository also includes a script to show a summary of a scan.  For example:
@@ -89,7 +102,7 @@ trust me. Updates and cleanups can take **hours** or even **days** to complete.
 
 Your first update will take a while but depends entirely on your connection and
 disk speeds. On a fast modern machine with a fast internet connection it may take
-as little as 10 minutes, but be prepared for it to take hours on a machine with
+as little as 15 minutes, but be prepared for it to take hours on a machine with
 a slower connection or disk speeds.
 
 But subsequent updates are smarter. The script tracks the SVN revision numbers

@@ -1,10 +1,10 @@
-<?php
+<?php declare( strict_types = 1 );
 
 /**
  * Truncates a string ($text) to a length ($length) by inserting an ellipsis in
  * the middle if necessary and possible.
  */
-function truncate_text( $text, $length ) {
+function truncate_text( string $text, int $length ): string {
 	if ( $length < 7 ) {
 		$length = 7;
 	}
@@ -32,10 +32,12 @@ function truncate_text( $text, $length ) {
  * make the string fit within the desired total length.
  */
 function fit_message(
-	$message1, $m_plugin1,
-	$message2, $m_plugin2,
-	$length = 80
-) {
+	string $message1,
+	string $m_plugin1,
+	string|null $message2,
+	string|null $m_plugin2,
+	int $length = 80
+): string {
 	$length1 = strlen( sprintf( $message1, $m_plugin1 ) );
 	if ( ! $message2 && $length1 <= $length ) {
 		// Easy case: one message, short enough
