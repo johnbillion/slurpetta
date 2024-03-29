@@ -14,7 +14,7 @@ function report_status( $data ) {
 	echo json_encode( $data ) . "\n";
 }
 
-if ( ! isset( $args[1] ) || ! $args[1] ) {
+if ( 'core' !== $type && empty( $args[1] ) ) {
 	report_status( array(
 		'type'    => 'error',
 		'details' => 'Invalid slug.',
@@ -45,6 +45,27 @@ switch ( $type ) {
 			'https://downloads.wordpress.org/theme/%s.latest-stable.zip?nostats=1',
 			$slug
 		);
+		break;
+
+	case 'core':
+		switch ( $slug ) {
+			case 'latest':
+				$download_path = 'zips/core-latest.zip';
+				$download_url = 'https://wordpress.org/latest.zip';
+				break;
+
+			case 'nightly':
+				$download_path = 'zips/core-nightly.zip';
+				$download_url = 'https://wordpress.org/nightly-builds/wordpress-latest.zip';
+				break;
+
+			default:
+				report_status( array(
+					'type'    => 'error',
+					'details' => 'Invalid type.',
+				) );
+				die();
+		}
 		break;
 
 	default:
@@ -94,8 +115,13 @@ if ( $return === 0 && file_exists( $download_path ) ) {
 		die();
 	}
 
-	$initial = $slug[0];
-	$filename = "{$type}/{$initial}/{$slug}";
+	if ( 'core' === $type ) {
+		$subdir = $slug;
+	} else {
+		$subdir = $slug[0];
+	}
+
+	$filename = "{$type}/{$subdir}/{$slug}";
 
 	if ( file_exists( $filename ) ) {
 		exec(
@@ -110,7 +136,7 @@ if ( $return === 0 && file_exists( $download_path ) ) {
 		sprintf(
 			'unzip -o -d %s/%s %s',
 			escapeshellarg( $type ),
-			escapeshellarg( $initial ),
+			escapeshellarg( $subdir ),
 			escapeshellarg( $download_path )
 		)
 	);

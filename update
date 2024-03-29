@@ -17,14 +17,15 @@ if ( ! empty( $args[1] ) ) {
 }
 
 if (
-	( $type !== 'plugins' && $type !== 'themes' ) ||
+	( $type !== 'plugins' && $type !== 'themes' && $type !== 'core' ) ||
 	$parallel < 1 || $parallel > 20
 ) {
 	echo $cmd . ": invalid arguments\n";
-	echo 'Usage: php ' . $cmd . " [plugins|themes] [parallel=12]\n\n";
+	echo 'Usage: php ' . $cmd . " [plugins|themes|core] [parallel=12]\n\n";
 	echo "Available commands:\n";
 	echo "  plugins - Downloads plugins. This is the default.\n";
 	echo "  themes  - Downloads themes.\n";
+	echo "  core    - Downloads WordPress core.\n";
 	echo "\n";
 	echo "Set 'parallel' to control the number of parallel processes.\n";
 	echo "  A smaller number may go more smoothly for slower connections.\n";
@@ -42,6 +43,11 @@ switch ( $type ) {
 }
 
 require_once 'common.php';
+
+if ( $type === 'core' ) {
+	$update_stats = download( 'core', [ 'latest', 'nightly' ], false );
+	exit( 0 );
+}
 
 echo "Determining most recent {$type} SVN revision...\n";
 

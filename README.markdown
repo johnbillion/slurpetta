@@ -6,13 +6,14 @@ version of:
 
 * Every plugin in the [WordPress.org plugin directory](https://wordpress.org/plugins/) with at least 10,000 active installations
 * Every theme in the [WordPress.org theme directory](https://wordpress.org/themes/) with at least 1,000 active installations
+* WordPress core
 
 As of March 2024 this is **around 2,500 plugins** and **700** themes.
 
 Slurping and updating just these plugins and themes is at least 20x faster and smaller than
 slurping the entire plugin and theme repos which would otherwise total over 100,000 items.
 
-Really handy for doing local searches across popular WordPress plugins and themes.
+Really handy for doing local searches across popular WordPress plugins, themes, and core.
 
 Requirements
 ------------
@@ -29,9 +30,11 @@ Run this from within the `slurpetta` directory:
 ```sh
 ./update plugins
 ./update themes
+./update core
 ```
 
 The `plugins` and `themes` directories will contain all the plugins and themes when the script is done.
+The `core` directory will contain the latest release of WordPress core.
 
 ### Scanning the repo
 
@@ -87,6 +90,7 @@ As of March 2024:
 
 * Around 12 GB of disk space for plugins
 * Around 3 GB of disk space for themes
+* A few MB of disk space for WordPress core
 
 ### Something went wrong, how do I do a partial update?
 
