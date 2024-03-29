@@ -62,6 +62,15 @@ Matches  Plugin                             Active installs
       5  custom-contact-forms                       60,000+
       2  appmaker-wp-mobile-app-manager                 50+
       4  appmaker-woocommerce-mobile-app-manager       200+
+
+5 matching themes
+Matches  Theme                              Active installs
+=======  =====                              ===============
+      4  rest-api                                   40,000+
+      4  wptoandroid                                    30+
+      5  custom-contact-forms                       60,000+
+      2  appmaker-wp-mobile-app-manager                 50+
+      4  appmaker-woocommerce-mobile-app-manager       200+
 ```
 
 FAQ
