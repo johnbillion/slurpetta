@@ -49,28 +49,26 @@ rg --type php 'rest_get_date_with_gmt' plugins
 This repository also includes a script to show a summary of a scan.  For example:
 
 ```sh
-rg --type php 'rest_get_date_with_gmt' plugins | tee scans/rest_get_date_with_gmt.txt
+rg --type php 'rest_get_date_with_gmt' plugins themes | tee scans/rest_get_date_with_gmt.txt
 ./summarize-scan.php scans/rest_get_date_with_gmt.txt
 ```
 
 ```
-5 matching plugins
-Matches  Plugin                             Active installs
-=======  ======                             ===============
-      4  rest-api                                   40,000+
-      4  wptoandroid                                    30+
-      5  custom-contact-forms                       60,000+
-      2  appmaker-wp-mobile-app-manager                 50+
-      4  appmaker-woocommerce-mobile-app-manager       200+
+Matching plugins: 83
+Matches  Slug                               Active installs
+=======  ====                               ===============
+     11  woocommerce                             5,000,000+
+      1  mailchimp-for-wp                        2,000,000+
+      1  advanced-custom-fields                  2,000,000+
+     52  custom-post-type-ui                     1,000,000+
+      5  astra-sites                             1,000,000+
+      1  better-wp-security                        900,000+
+      1  woocommerce-gateway-stripe                800,000+
+      8  imagify                                   800,000+
+      1  woocommerce-payments                      700,000+
+      1  premium-addons-for-elementor              700,000+
 
-5 matching themes
-Matches  Theme                              Active installs
-=======  =====                              ===============
-      4  rest-api                                   40,000+
-      4  wptoandroid                                    30+
-      5  custom-contact-forms                       60,000+
-      2  appmaker-wp-mobile-app-manager                 50+
-      4  appmaker-woocommerce-mobile-app-manager       200+
+Matching themes: 0
 ```
 
 FAQ

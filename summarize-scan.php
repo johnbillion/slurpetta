@@ -56,6 +56,10 @@ foreach ( $scan_info as $type => $items ) {
 		$num_results
 	) );
 
+	if ( empty( $items ) ) {
+		continue;
+	}
+
 	echo 'Matches  ' . str_pad( 'Slug', $max_name_length - 3 ) . "Active installs\n";
 	echo '=======  ' . str_pad( '====', $max_name_length - 3 ) . "===============\n";
 
