@@ -48,19 +48,17 @@ Examples:
 rg --type php 'rest_get_date_with_gmt' plugins
 ```
 
-
 #### Advanced scanning
 
 It's possible to perform more powerful searches that are aware of language syntax and semantics using [Semgrep](https://github.com/semgrep/semgrep). It's available via package managers or via Docker. You don't need to sign into the Semgrep Code service on the CLI despite what its documentation says.
 
-Semgrep is substantially slower than ripgrep but it allows you to perform searches using [its language-aware pattern syntax](https://semgrep.dev/docs/writing-rules/pattern-syntax/). Benefits include ignoring code comments and being aware of multi-line matches because it's aware of the semantics of the code beyond simple static analysis.
+Semgrep allows you to perform searches using [its language-aware pattern syntax](https://semgrep.dev/docs/writing-rules/pattern-syntax/). Benefits include ignoring code comments and being aware of multi-line matches because it's aware of the semantics of the code beyond simple static analysis. Note that complex searches will take a lot more time than standard searches with ripgrep.
 
 Examples:
 
 ```sh
 semgrep -e 'printf(esc_attr__(...), ...)' --lang=php --no-git-ignore plugins
 ```
-
 
 #### Generating scan summaries
 
