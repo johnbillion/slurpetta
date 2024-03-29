@@ -2,14 +2,17 @@ Slurpetta
 =========
 
 A command line PHP script that downloads and updates a copy of the latest stable
-version of every plugin in the [WordPress.org plugin directory][repo] with at
-least 10,000 active installations. As of March 2024 this is **around 2,500 plugins**.
-Slurping and updating just these plugins is at least 20x faster and smaller than
-slurping the entire plugin directory.
+version of:
 
-Really handy for doing local searches across popular WordPress plugins.
+* Every plugin in the [WordPress.org plugin directory](https://wordpress.org/plugins/) with at least 10,000 active installations
+* Every theme in the [WordPress.org theme directory](https://wordpress.org/themes/) with at least 1,000 active installations
 
-[repo]: http://wordpress.org/plugins/
+As of March 2024 this is **around 2,500 plugins** and **700** themes.
+
+Slurping and updating just these plugins and themes is at least 20x faster and smaller than
+slurping the entire plugin and theme repos which would otherwise total over 100,000 items.
+
+Really handy for doing local searches across popular WordPress plugins and themes.
 
 Requirements
 ------------
@@ -23,8 +26,9 @@ Instructions
 
 Run this from within the `slurpetta` directory:
 
-```
-./update
+```sh
+./update plugins
+./update themes
 ```
 
 The `plugins` and `themes` directories will contain all the plugins and themes when the script is done.
@@ -69,19 +73,20 @@ trust me. Updates and cleanups can take **hours** or even **days** to complete.
 
 Your first update will take a while but depends entirely on your connection and
 disk speeds. On a fast modern machine with a fast internet connection it may take
-as little as ten minutes, but be prepared for it to take hours on a machine with
+as little as 10 minutes, but be prepared for it to take hours on a machine with
 a slower connection or disk speeds.
 
-But subsequent updates are smarter. The script tracks the SVN revision number
-of your latest update and then asks the plugins SVN repository for a list of
-plugins that have changed since. Only those changed plugins are updated after
-the initial sync.
+But subsequent updates are smarter. The script tracks the SVN revision numbers
+of your latest updates and then asks the SVN repositories for a list of plugins
+and themes that have changed since. Only those changed are updated after the
+initial sync.
 
 ### How much disk space do I need?
 
-As of March 2024 the plugin repository contains over 100,000 plugins. The
-script will download just those with more than 10,000 active installations
-which when unpacked will use around 12 GB of disk space.
+As of March 2024:
+
+* Around 12 GB of disk space for plugins
+* Around 3 GB of disk space for themes
 
 ### Something went wrong, how do I do a partial update?
 

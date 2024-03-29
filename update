@@ -5,33 +5,55 @@ $cmd = array_shift( $args );
 
 chdir( dirname( __FILE__ ) );
 
-$minimum_active_installs = 10000;
-$type = 'all';
+$type = 'plugins';
+
+if ( ! empty( $args[0] ) ) {
+	$type = $args[0];
+}
 
 $parallel = 12;
-if ( ! empty( $args[0] ) ) {
-	$parallel = (int) $args[0];
+if ( ! empty( $args[1] ) ) {
+	$parallel = (int) $args[1];
 }
 
 if (
+	( $type !== 'plugins' && $type !== 'themes' ) ||
 	$parallel < 1 || $parallel > 20
 ) {
 	echo $cmd . ": invalid arguments\n";
-	echo 'Usage: php ' . $cmd . " [parallel=12]\n\n";
+	echo 'Usage: php ' . $cmd . " [plugins|themes] [parallel=12]\n\n";
+	echo "Available commands:\n";
+	echo "  plugins - Downloads plugins. This is the default.\n";
+	echo "  themes  - Downloads themes.\n";
+	echo "\n";
 	echo "Set 'parallel' to control the number of parallel processes.\n";
 	echo "  A smaller number may go more smoothly for slower connections.\n";
 	echo "  More than 12 is not recommended.\n";
 	die();
 }
 
+switch ( $type ) {
+	case 'plugins':
+		$minimum_active_installs = 10000;
+		break;
+	case 'themes':
+		$minimum_active_installs = 1000;
+		break;
+}
+
 require_once 'common.php';
 
-echo "Determining most recent SVN revision...\n";
+echo "Determining most recent {$type} SVN revision...\n";
 
 try {
 	ini_set( 'user_agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:80.0) Gecko/20100101 Firefox/80.0' );
-	$changelog = @file_get_contents( 'https://plugins.trac.wordpress.org/log/?format=changelog&stop_rev=HEAD' );
-	print_r( $changelog );
+	$changelog = @file_get_contents(
+		sprintf(
+			'https://%s.trac.wordpress.org/log/?format=changelog&stop_rev=HEAD',
+			$type
+		)
+	);
+
 	if ( ! $changelog ) {
 		throw new Exception( 'Could not fetch the SVN changelog' );
 	}
@@ -45,7 +67,7 @@ try {
 
 $svn_last_revision = (int) $matches[1];
 
-echo "Most recent plugin SVN revision : $svn_last_revision\n";
+echo "Most recent {$type} SVN revision : $svn_last_revision\n";
 $last_revision = read_last_revision( $type );
 
 $start_time = time();
@@ -53,7 +75,7 @@ $start_time = time();
 if ( $last_revision === $svn_last_revision ) {
 	// Nothing to do.
 
-	echo "Your copy of the plugin repository is up to date.\n";
+	echo "Your copy of the {$type} repository is up to date.\n";
 	exit( 0 );
 
 } else if ( $last_revision ) {
@@ -62,23 +84,23 @@ if ( $last_revision === $svn_last_revision ) {
 	echo "Last synced revision     : $last_revision\n";
 
 	if ( $svn_last_revision - $last_revision > 200000 ) {
-		echo "Your copy of the plugin repository is VERY far behind.\n";
+		echo "Your copy of the {$type} repository is VERY far behind.\n";
 		echo "We'll try to sync, but you may want to delete it and start over.\n";
 	}
 
-	// For each plugin, store an array of revision indices where it was
+	// For each result, store an array of revision indices where it was
 	// updated.  These indices point to entries in the $revisions array.
 	// Structure:
 	// {
-	//     'plugin-slug': [
+	//     'slug': [
 	//         IndexIn$revisions,
 	//         ...
 	//     ],
 	//     ...
 	// }
-	$plugins = array();
+	$items = array();
 
-	// Store an array of revisions too.  When a plugin is updated, ALL of its
+	// Store an array of revisions too.  When a plugin or theme is updated, ALL of its
 	// associated revisions will be marked as updated in this list.  During a
 	// partial sync, this allows us to accurately determine the latest revision
 	// saved on the hard drive.
@@ -87,7 +109,7 @@ if ( $last_revision === $svn_last_revision ) {
 	//     {
 	//         'number': RevisionNumber,
 	//         'to_update': {
-	//             'plugin-slug': true,
+	//             'slug': true,
 	//             ...
 	//         }
 	//     },
@@ -95,13 +117,14 @@ if ( $last_revision === $svn_last_revision ) {
 	// ]
 	$revisions = array();
 
-	// Fetch the plugins repository changelog using `svn log`.
+	// Fetch the repository changelog using `svn log`.
 	$changelog_command = sprintf(
-		'svn log -v -q https://plugins.svn.wordpress.org/ -r %d:%d',
+		'svn log -v -q https://%s.svn.wordpress.org/ -r %d:%d',
+		$type,
 		$svn_last_revision,
 		$last_revision + 1
 	);
-	echo "Requesting plugins changelog:\n";
+	echo "Requesting {$type} changelog:\n";
 	echo "$changelog_command\n";
 
 	// Start `svn` process.
@@ -127,14 +150,14 @@ if ( $last_revision === $svn_last_revision ) {
 			}
 
 		} else if ( preg_match( '#^   [ADMR] /([^/(]+)/#', $line, $matches ) ) {
-			// This line indicates an operation performed on a plugin file.
-			// For copies we get lines like "   A /plugin-slug (from /...:###)"
+			// This line indicates an operation performed on a file.
+			// For copies we get lines like "   A /slug (from /...:###)"
 			// (r1725406 for example) so trim to remove any extra spaces.
-			$plugin = trim( $matches[1] );
+			$slug = trim( $matches[1] );
 
-			if ( ! isset( $plugins[ $plugin ] ) ) {
-				// This is the first time we've seen this plugin.
-				$plugins[ $plugin ] = array();
+			if ( ! isset( $items[ $slug ] ) ) {
+				// This is the first time we've seen this slug.
+				$items[ $slug ] = array();
 			}
 
 			if (
@@ -150,12 +173,12 @@ if ( $last_revision === $svn_last_revision ) {
 
 			$rev_index = count( $revisions ) - 1;
 
-			// Mark this plugin as updated by the current revision.  (It's
-			// possible for a plugin author to update multiple plugins in a
+			// Mark this slug as updated by the current revision.  (It's
+			// possible for an author to update multiple plugins or themes in a
 			// single revision.)
-			if ( ! isset( $revisions[ $rev_index ]['to_update'][ $plugin ] ) ) {
-				$revisions[ $rev_index ]['to_update'][ $plugin ] = true;
-				array_push( $plugins[ $plugin ], $rev_index );
+			if ( ! isset( $revisions[ $rev_index ]['to_update'][ $slug ] ) ) {
+				$revisions[ $rev_index ]['to_update'][ $slug ] = true;
+				array_push( $items[ $slug ], $rev_index );
 			}
 		}
 	}
@@ -179,37 +202,38 @@ if ( $last_revision === $svn_last_revision ) {
 	// Make sure we got all the expected changelog entries.
 	if ( $revision !== $last_revision + 1 ) {
 		throw new Exception( sprintf(
-			'Failed to parse plugins changelog (expected revision %d but found %d).',
+			'Failed to parse %s changelog (expected revision %d but found %d).',
+			$type,
 			$last_revision + 1,
 			$revision
 		) );
 	}
 
-	// We have data structures with info about all the plugins and revisions we
+	// We have data structures with info about all the items and revisions we
 	// need to fetch.  Now, loop over all the revisions in reverse order
-	// (oldest to newest) and fetch plugins in this order.
-	$plugins_ordered = array();
+	// (oldest to newest) and fetch items in this order.
+	$slugs_ordered = array();
 	for ( $i = count( $revisions ) - 1; $i >= 0; $i-- ) {
-		foreach ( $revisions[ $i ]['to_update'] as $plugin => $ignore ) {
-			$plugins_ordered[ $plugin ] = true;
+		foreach ( $revisions[ $i ]['to_update'] as $slug => $ignore ) {
+			$slugs_ordered[ $slug ] = true;
 		}
 	}
 
-	$popular_plugins = fetch_popular_slugs( 'plugins', $minimum_active_installs );
-	$plugins_ordered = array_intersect(
-		array_keys( $plugins_ordered ),
-		$popular_plugins
+	$popular_slugs = fetch_popular_slugs( $type, $minimum_active_installs );
+	$slugs_ordered = array_intersect(
+		array_keys( $slugs_ordered ),
+		$popular_slugs
 	);
 
 	printf(
-		"%d plugin%s to update (%d SVN revision%s)\n",
-		count( $plugins_ordered ),
-		( count( $plugins_ordered ) === 1 ? '' : 's' ),
+		"%d %s to update (%d SVN revision%s)\n",
+		count( $slugs_ordered ),
+		$type,
 		count( $revisions ),
 		( count( $revisions ) === 1 ? '' : 's' )
 	);
 
-	$update_stats = download_plugins( $type, $plugins_ordered, true );
+	$update_stats = download( $type, $slugs_ordered, true );
 	// This should happen during the update but it won't hurt to do it again.
 	write_last_revision( $type, $svn_last_revision );
 
@@ -221,16 +245,17 @@ if ( $last_revision === $svn_last_revision ) {
 	echo "Settle in.  This will take a while.\n";
 	echo "\n";
 
-	echo "Fetching list of plugins with {$minimum_active_installs} or more active installations...\n";
+	echo "Fetching list of {$type} with {$minimum_active_installs} or more active installations...\n";
 
-	$plugins = fetch_popular_slugs( 'plugins', $minimum_active_installs );
+	$slugs = fetch_popular_slugs( $type, $minimum_active_installs );
 
 	printf(
-		"%d plugins to download\n",
-		count( $plugins )
+		"%d %s to download\n",
+		count( $slugs ),
+		$type
 	);
 
-	$update_stats = download_plugins( $type, $plugins, false );
+	$update_stats = download( $type, $slugs, false );
 	write_last_revision( $type, $svn_last_revision );
 
 }
@@ -239,15 +264,15 @@ $end_time = time();
 $minutes = floor( ( $end_time - $start_time ) / 60 );
 $seconds = ( $end_time - $start_time ) % 60;
 
-echo "[SUCCESS] Done updating plugins!\n";
+echo "[SUCCESS] Done updating {$type}!\n";
 printf(
-	"It took %d minute%s and %d second%s to update %d plugin%s (%d failed).\n",
+	"It took %d minute%s and %d second%s to update %d %s (%d failed).\n",
 	$minutes,
 	( $minutes === 1 ? '' : 's' ),
 	$seconds,
 	( $seconds === 1 ? '' : 's' ),
 	$update_stats['updated'],
-	( $update_stats['updated'] === 1 ? '' : 's' ),
+	$type,
 	$update_stats['failed']
 );
 echo "[DONE]\n";

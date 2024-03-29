@@ -2,7 +2,7 @@
 
 require_once 'formatting.php';
 
-function fetch_popular_slugs( $type = 'plugins', $minimum_active_installs = 10000 ) {
+function fetch_popular_slugs( string $type, int $minimum_active_installs ) {
 	// The maximum number of results per page is 250.
 	$url = 'https://api.wordpress.org/%1$s/info/1.2/?action=query_%1$s&request[browse]=popular&request[fields][active_installs]=1&request[per_page]=250&request[page]=%2$d';
 	$page = 1;
@@ -41,67 +41,54 @@ function fetch_popular_slugs( $type = 'plugins', $minimum_active_installs = 1000
 	return $assets;
 }
 
-function get_directory_by_type( $type ) {
-	switch ( $type ) {
-		case 'readme':
-			return 'readmes';
-		case 'all':
-			return 'plugins';
-	}
-}
-
 function read_last_revision( $type ) {
-	$directory = get_directory_by_type( $type );
-
-	if ( file_exists( $directory . '/.last-revision' ) ) {
-		return (int) file_get_contents( $directory . '/.last-revision' );
+	if ( file_exists( $type . '/.last-revision' ) ) {
+		return (int) file_get_contents( $type . '/.last-revision' );
 	} else {
 		return 0;
 	}
 }
 
 function write_last_revision( $type, $revision ) {
-	$directory = get_directory_by_type( $type );
-
 	file_put_contents(
-		$directory . '/.last-revision',
+		$type . '/.last-revision',
 		"$revision\n"
 	);
 }
 
-function download_plugins( $type, $plugin_names, $is_partial_sync ) {
+function download( $type, $slugs, $is_partial_sync ) {
 	try {
-		return download_plugins_internal( $type, $plugin_names, $is_partial_sync );
+		return download_internal( $type, $slugs, $is_partial_sync );
 	} catch ( Exception $e ) {
 		echo $e->getMessage() . "\n";
 		exit( 1 );
 	}
 }
 
-function download_plugins_internal( $type, $plugin_names, $is_partial_sync ) {
+function download_internal( $type, $slugs, $is_partial_sync ) {
 	// Number of simultaneous downloads
 	global $parallel;
 
 	// Data structures defined previously for partial sync
-	global $plugins, $revisions;
+	global $items, $revisions;
 
 	if ( $is_partial_sync ) {
 		$current_revision = $revisions[ count( $revisions ) - 1 ]['number'];
 	}
 
 	$stats = array(
-		'total'   => count( $plugin_names ),
+		'total'   => count( $slugs ),
 		'updated' => 0,
 		'failed'  => 0,
 	);
 
-	$download_path = get_directory_by_type( $type ) . '/.to_download';
+	$download_path = $type . '/.to_download';
 	file_put_contents(
 		$download_path,
-		implode( "\n", $plugin_names )
+		implode( "\n", $slugs )
 	);
 
-	// Start `xargs` to process plugin downloads in parallel.
+	// Start `xargs` to process downloads in parallel.
 	$descriptors = array(
 		0 => array( 'file', $download_path, 'r' ), // `xargs` will read from this file
 		1 => array( 'pipe', 'w' ),                 // `xargs` will write to stdout
@@ -113,7 +100,7 @@ function download_plugins_internal( $type, $plugin_names, $is_partial_sync ) {
 		$pipes
 	);
 
-	// Track which plugins are in progress and when they were started
+	// Track which items are in progress and when they were started
 	$in_progress = array();
 
 	// Process output from `./download` script instances (newline-delimited
@@ -121,17 +108,17 @@ function download_plugins_internal( $type, $plugin_names, $is_partial_sync ) {
 	while ( ( $line = fgets( $pipes[1] ) ) !== false ) {
 		$line = trim( $line );
 		$data = json_decode( $line, true );
-		if ( ! $data || ! $data['type'] || ! $data['plugin'] ) {
+		if ( ! $data || ! $data['type'] || ! $data['slug'] ) {
 			throw new Exception(
 				"Invalid progress update message: $line"
 			);
 		}
 
-		$plugin = $data['plugin'];
+		$slug = $data['slug'];
 
 		switch ( $data['type'] ) {
 			case 'start':
-				$in_progress[ $plugin ] = array(
+				$in_progress[ $slug ] = array(
 					'started'       => time(),
 					'download_path' => $data['download_path'],
 					'download_url'  => $data['download_url'],
@@ -141,17 +128,17 @@ function download_plugins_internal( $type, $plugin_names, $is_partial_sync ) {
 			case 'done':
 				$status = ' OK ';
 				$stats['updated']++;
-				unset( $in_progress[ $plugin ] );
+				unset( $in_progress[ $slug ] );
 				break;
 			case 'fail':
 				$status = 'FAIL';
 				$stats['failed']++;
 				file_put_contents(
-					get_directory_by_type( $type ) . '/.failed_downloads',
-					"$plugin\n",
+					$type . '/.failed_downloads',
+					"$slug\n",
 					FILE_APPEND
 				);
-				unset( $in_progress[ $plugin ] );
+				unset( $in_progress[ $slug ] );
 				break;
 			case 'error':
 				throw new Exception(
@@ -176,12 +163,12 @@ function download_plugins_internal( $type, $plugin_names, $is_partial_sync ) {
 		$m_plugin2 = null;
 
 		if ( $is_partial_sync ) {
-			// Look through each revision associated with this plugin and
-			// un-mark the plugin as having a pending update.
-			foreach ( $plugins[ $plugin ] as $index ) {
-				unset( $revisions[ $index ]['to_update'][ $plugin ] );
+			// Look through each revision associated with this item and
+			// un-mark the item as having a pending update.
+			foreach ( $items[ $slug ] as $index ) {
+				unset( $revisions[ $index ]['to_update'][ $slug ] );
 			}
-			// Look for revisions that have no more plugins left to update.
+			// Look for revisions that have no more items left to update.
 			$last_revision = $current_revision;
 			for ( $i = count( $revisions ) - 1; $i >= 0; $i-- ) {
 				if ( empty( $revisions[ $i ]['to_update'] ) ) {
@@ -208,7 +195,7 @@ function download_plugins_internal( $type, $plugin_names, $is_partial_sync ) {
 					time() > $p_info['started'] + 30
 				) {
 					if ( ! isset( $p_info['size'] ) ) {
-						// Do a HEAD request for the plugin zip
+						// Do a HEAD request for the zip
 						exec(
 							"wget '$p_info[download_url]' --spider 2>&1",
 							$p_output
@@ -239,7 +226,7 @@ function download_plugins_internal( $type, $plugin_names, $is_partial_sync ) {
 			unset( $p_info );
 		}
 
-		echo fit_message( $message1, $plugin, $message2, $m_plugin2 ) . "\n";
+		echo fit_message( $message1, $slug, $message2, $m_plugin2 ) . "\n";
 	}
 
 	fclose( $pipes[1] );

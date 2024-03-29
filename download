@@ -8,31 +8,42 @@ chdir( dirname( __FILE__ ) );
 $type = $args[0];
 
 function report_status( $data ) {
-	global $plugin;
+	global $slug;
 
-	$data['plugin'] = $plugin;
+	$data['slug'] = $slug;
 	echo json_encode( $data ) . "\n";
 }
 
 if ( ! isset( $args[1] ) || ! $args[1] ) {
 	report_status( array(
 		'type'    => 'error',
-		'details' => 'Invalid plugin slug.',
+		'details' => 'Invalid slug.',
 	) );
 	die();
 }
 
-$plugin = $args[1];
+$slug = $args[1];
 
 switch ( $type ) {
-	case 'all':
+	case 'plugins':
 		$download_path = sprintf(
 			'zips/%s.zip',
-			$plugin
+			$slug
 		);
 		$download_url = sprintf(
 			'https://downloads.wordpress.org/plugin/%s.latest-stable.zip?nostats=1',
-			$plugin
+			$slug
+		);
+		break;
+
+	case 'themes':
+		$download_path = sprintf(
+			'zips/%s.zip',
+			$slug
+		);
+		$download_url = sprintf(
+			'https://downloads.wordpress.org/theme/%s.latest-stable.zip?nostats=1',
+			$slug
 		);
 		break;
 
@@ -62,71 +73,70 @@ exec(
 if ( $return === 0 && file_exists( $download_path ) ) {
 	// The download succeeded.
 
-	if ( $type === 'all' ) {
-		// Unzip the plugin file, limiting to one plugin at a time across all
-		// processes.  Otherwise, for slow disk speeds, this tool spends most
-		// of its time unzipping.  (For fast disks like SSDs this doesn't seem
-		// to make much difference.)
-		$unzip_lock = fopen( 'plugins/.unzip_lock', 'w' );
-		if ( ! $unzip_lock ) {
-			report_status( array(
-				'type'    => 'error',
-				'details' => 'Failed to open unzip lockfile.',
-			) );
-			die();
-		}
+	// Unzip the zip file, limiting to one zip at a time across all
+	// processes.  Otherwise, for slow disk speeds, this tool spends most
+	// of its time unzipping.  (For fast disks like SSDs this doesn't seem
+	// to make much difference.)
+	$unzip_lock = fopen( $type . '/.unzip_lock', 'w' );
+	if ( ! $unzip_lock ) {
+		report_status( array(
+			'type'    => 'error',
+			'details' => 'Failed to open unzip lockfile.',
+		) );
+		die();
+	}
 
-		if ( ! flock( $unzip_lock, LOCK_EX ) ) {
-			report_status( array(
-				'type'    => 'error',
-				'details' => 'Failed to lock unzip lockfile.',
-			) );
-			die();
-		}
+	if ( ! flock( $unzip_lock, LOCK_EX ) ) {
+		report_status( array(
+			'type'    => 'error',
+			'details' => 'Failed to lock unzip lockfile.',
+		) );
+		die();
+	}
 
-		$initial = $plugin[0];
-		$filename = "plugins/{$initial}/{$plugin}";
+	$initial = $slug[0];
+	$filename = "{$type}/{$initial}/{$slug}";
 
-		if ( file_exists( $filename ) ) {
-			exec(
-				sprintf(
-					'rm -rf %s',
-					escapeshellarg( $filename )
-				)
-			);
-		}
-
-		exec(
-			sprintf(
-				'unzip -o -d plugins/%s %s',
-				escapeshellarg( $initial ),
-				escapeshellarg( $download_path )
-			)
-		);
-
+	if ( file_exists( $filename ) ) {
 		exec(
 			sprintf(
 				'rm -rf %s',
-				escapeshellarg( $download_path )
+				escapeshellarg( $filename )
 			)
 		);
-
-		flock( $unzip_lock, LOCK_UN );
-		fclose( $unzip_lock );
 	}
+
+	exec(
+		sprintf(
+			'unzip -o -d %s/%s %s',
+			escapeshellarg( $type ),
+			escapeshellarg( $initial ),
+			escapeshellarg( $download_path )
+		)
+	);
+
+	exec(
+		sprintf(
+			'rm -rf %s',
+			escapeshellarg( $download_path )
+		)
+	);
+
+	flock( $unzip_lock, LOCK_UN );
+	fclose( $unzip_lock );
 
 	report_status( array(
 		'type' => 'done',
 	) );
 
 } else if ( $return === 8 ) {
-	// Server issued an error response (404 for missing plugins).  See:
+	// Server issued an error response (404 for missing files).  See:
 	// https://www.gnu.org/software/wget/manual/html_node/Exit-Status.html
 	// TODO Detect 5xx errors
 
 	report_status( array(
 		'type'    => 'fail',
-		'details' => 'Could not download plugin.',
+		'details' => 'Could not download zip.',
 	) );
 
 } else {
