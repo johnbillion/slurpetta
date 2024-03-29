@@ -25,10 +25,12 @@ function fetch_popular_slugs( string $type, int $minimum_active_installs ) {
 		$pages = $data['info']['pages'];
 
 		foreach ( $data[ $type ] as $result ) {
-			if ( $result['active_installs'] >= $minimum_active_installs ) {
-				$assets[] = $result['slug'];
-			} else {
-				// The results are approximately sorted by active installs, so we can stop after this page of results.
+			$installs = (int) $result['active_installs'];
+			if ( $installs >= $minimum_active_installs ) {
+				$assets[ $result['slug'] ] = $installs;
+			} elseif ( $type === 'plugins' ) {
+				// The results for plugins are approximately ordered by active installs, so we can stop after this page of results.
+				// The results for themes are ordered much more fuzzily, so we need to iterate all themes.
 				$page = $pages;
 			}
 		}
@@ -36,9 +38,21 @@ function fetch_popular_slugs( string $type, int $minimum_active_installs ) {
 		$page++;
 	} while ( $page <= $pages );
 
-	sort( $assets );
+	arsort( $assets );
 
-	return $assets;
+	$download_path = $type . '/.active_installs';
+	$lines = [];
+
+	foreach ( $assets as $slug => $installs ) {
+		$lines[] = "{$slug},{$installs}";
+	}
+
+	file_put_contents(
+		$download_path,
+		implode( "\n", $lines )
+	);
+
+	return array_keys( $assets );
 }
 
 function read_last_revision( $type ) {

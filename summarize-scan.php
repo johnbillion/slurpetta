@@ -8,21 +8,26 @@ $current_plugin  = '';
 $current_count   = 0;
 $max_name_length = 0;
 
+$installs = file_get_contents( 'plugins/.active_installs' );
+$installs = explode( "\n", $installs );
+$all_active_installs = array();
+
+foreach ( $installs as $install ) {
+	$install = explode( ',', $install );
+	$all_active_installs[ $install[0] ] = (int) $install[1];
+}
+
 function save_current_plugin_info() {
-	global $scan_info, $current_plugin, $current_count, $max_name_length;
+	global $scan_info, $current_plugin, $current_count, $max_name_length, $all_active_installs;
 	if ( $current_count > 0 ) {
 		array_push( $scan_info, array(
 			'plugin_name' => $current_plugin,
 			'matches'     => $current_count,
+			'installs'    => $all_active_installs[ $current_plugin ] ?? 0,
 		) );
 		$current_count = 0;
 		$max_name_length = max( strlen( $current_plugin ), $max_name_length );
 	}
-}
-
-function get_http_response_code( $url ) {
-	$headers = get_headers( $url);
-	return substr( $headers[0], 9, 3 );
 }
 
 while ( ( $line = fgets( $handle ) ) !== false ) {
@@ -40,6 +45,10 @@ fclose( $handle );
 
 save_current_plugin_info();
 
+usort( $scan_info, function( $a, $b ) {
+	return ( $b['installs'] - $a['installs'] );
+} );
+
 $num_results = count( $scan_info );
 fwrite( STDERR, sprintf(
 	"%d matching plugin%s\n",
@@ -51,18 +60,11 @@ echo 'Matches  ' . str_pad( 'Plugin', $max_name_length - 3 ) . "Active installs\
 echo '=======  ' . str_pad( '======', $max_name_length - 3 ) . "===============\n";
 
 foreach ( $scan_info as $plugin ) {
-	ini_set( 'user_agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:80.0) Gecko/20100101 Firefox/80.0' );
-	$api_url = "https://api.wordpress.org/plugins/info/1.1/?action=plugin_information&request[slug]=$plugin[plugin_name]&request[fields][active_installs]=1";
-
-	if ( get_http_response_code( $api_url ) != "200" ){
-		$result = false;
-	} else {
-		$result = json_decode( file_get_contents( $api_url ) );
-	}
+	$result = $plugin['installs'] ?: null;
 
 	if ( $result ) {
 		$active_installs = str_pad(
-			number_format( $result->active_installs ),
+			number_format( $result ),
 			9, ' ', STR_PAD_LEFT
 		) . '+';
 	} else {
