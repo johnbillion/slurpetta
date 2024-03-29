@@ -69,6 +69,12 @@ Matches  Slug                               Active installs
       1  premium-addons-for-elementor              700,000+
 
 Matching themes: 0
+
+Matching core: 2
+Matches  Slug  Active installs
+=======  ====  ===============
+      5  latest              -
+      5  nightly             -
 ```
 
 FAQ

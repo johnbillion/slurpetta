@@ -79,7 +79,7 @@ foreach ( $scan_info as $type => $items ) {
 				9, ' ', STR_PAD_LEFT
 			) . '+';
 		} else {
-			$active_installs = '   Unknown';
+			$active_installs = '         -';
 		}
 		echo str_pad( $item['matches'], 7, ' ', STR_PAD_LEFT )
 			. '  '
