@@ -53,26 +53,25 @@ if ( $type === 'core' ) {
 echo "Determining most recent {$type} SVN revision...\n";
 
 try {
-	ini_set( 'user_agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:80.0) Gecko/20100101 Firefox/80.0' );
-	$changelog = @file_get_contents(
+	$revision = shell_exec(
 		sprintf(
-			'https://%s.trac.wordpress.org/log/?format=changelog&stop_rev=HEAD',
+			'svn info https://%s.svn.wordpress.org/ | grep Revision',
 			$type
 		)
 	);
 
-	if ( ! $changelog ) {
-		throw new Exception( 'Could not fetch the SVN changelog' );
+	if ( ! $revision ) {
+		throw new Exception( 'Could not fetch the latest SVN revision number' );
 	}
-	preg_match( '#\[([0-9]+)\]#', $changelog, $matches );
-	if ( ! $matches[1] ) {
+	preg_match( '#[0-9]+#', $revision, $matches );
+	if ( ! $matches[0] ) {
 		throw new Exception( 'Could not determine most recent revision.' );
 	}
 } catch ( Exception $e ) {
 	die( $e->getMessage() . "\n" );
 }
 
-$svn_last_revision = (int) $matches[1];
+$svn_last_revision = (int) $matches[0];
 
 echo "Most recent {$type} SVN revision : $svn_last_revision\n";
 $last_revision = read_last_revision( $type );
