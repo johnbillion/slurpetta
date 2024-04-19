@@ -193,6 +193,8 @@ if ( $last_revision === $svn_last_revision ) {
 
 	sleep(1);
 	$status = proc_get_status( $svn );
+	proc_close( $svn );
+
 	if ( $status['running'] ) {
 		throw new Exception(
 			'svn should not still be running.'
@@ -204,8 +206,6 @@ if ( $last_revision === $svn_last_revision ) {
 			$status['exitcode']
 		) );
 	}
-
-	proc_close( $svn );
 
 	// Make sure we got all the expected changelog entries.
 	if ( $revision !== $last_revision + 1 ) {

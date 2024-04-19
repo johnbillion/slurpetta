@@ -236,7 +236,10 @@ function download( string $type, array $slugs, bool $is_partial_sync ): array {
 
 	fclose( $pipes[1] );
 
+	sleep(1);
 	$status = proc_get_status( $xargs );
+	proc_close( $xargs );
+
 	if ( $status['running'] ) {
 		throw new Exception(
 			'xargs should not still be running'
@@ -247,8 +250,6 @@ function download( string $type, array $slugs, bool $is_partial_sync ): array {
 			'unexpected xargs exit code: ' . $status['exitcode']
 		);
 	}
-
-	proc_close( $xargs );
 
 	return $stats;
 }
