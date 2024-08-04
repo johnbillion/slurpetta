@@ -33,6 +33,20 @@ function fetch_popular_slugs( string $type, int $minimum_active_installs ): arra
 				// The results for themes are ordered much more fuzzily, so we need to iterate all themes.
 				$page = $pages;
 			}
+
+			if ( $installs > 1000000 ) {
+				$initial = $result['slug'][0];
+				$target = __DIR__ . '/plugins/' . $initial . '/' . $result['slug'];
+				$link = __DIR__ . '/popular/' . $result['slug'];
+
+				if ( ! file_exists( $link ) ) {
+					// Create a symlink to the plugin in the popular directory if it has more than 1 million active installations.
+					symlink(
+						$target,
+						$link,
+					);
+				}
+			}
 		}
 
 		$page++;
