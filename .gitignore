@@ -2,6 +2,8 @@ plugins/
 !plugins/README.md
 popular/
 !popular/README.md
+top/
+!top/README.md
 themes/
 !themes/README.md
 core/

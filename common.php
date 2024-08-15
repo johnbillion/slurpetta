@@ -34,13 +34,27 @@ function fetch_popular_slugs( string $type, int $minimum_active_installs ): arra
 				$page = $pages;
 			}
 
-			if ( $installs > 1000000 ) {
+			if ( $installs >= 1000000 ) {
 				$initial = $result['slug'][0];
 				$target = __DIR__ . '/plugins/' . $initial . '/' . $result['slug'];
 				$link = __DIR__ . '/popular/' . $result['slug'];
 
 				if ( ! file_exists( $link ) ) {
 					// Create a symlink to the plugin in the popular directory if it has more than 1 million active installations.
+					symlink(
+						$target,
+						$link,
+					);
+				}
+			}
+
+			if ( $installs >= 5000000 ) {
+				$initial = $result['slug'][0];
+				$target = __DIR__ . '/plugins/' . $initial . '/' . $result['slug'];
+				$link = __DIR__ . '/top/' . $result['slug'];
+
+				if ( ! file_exists( $link ) ) {
+					// Create a symlink to the plugin in the top directory if it has more than 5 million active installations.
 					symlink(
 						$target,
 						$link,
