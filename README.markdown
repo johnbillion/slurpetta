@@ -1,5 +1,4 @@
-Slurpetta
-=========
+# Slurpetta
 
 A command line PHP script that downloads and updates a copy of the latest stable
 version of:
@@ -8,22 +7,20 @@ version of:
 * Every theme in the WordPress.org directory with at least 1,000 active installations
 * WordPress core latest and nightly
 
-As of March 2024 this is **around 2,500 plugins** and **700** themes.
+As of August 2024 this is **around 2,500 plugins** and **700** themes.
 
 Slurping and updating just these plugins and themes is at least 20x faster and smaller than
 slurping the entire plugin and theme repos which would otherwise total over 100,000 items.
 
 Really handy for doing local searches across popular WordPress plugins, themes, and core.
 
-Requirements
-------------
+## Requirements
 
 * Unix system (tested on Mac OS X and Linux)
 * PHP 8.0 or higher
 * `wget` and `svn` command-line executables installed
 
-Instructions
-------------
+## Instructions
 
 Run this from within the `slurpetta` directory:
 
@@ -40,9 +37,9 @@ When the script is done:
 * The `top` directory contains symlinks to all plugins with over 5M active installations
 * The `core` directory contains the latest release of WordPress core
 
-### Scanning the results
+## Scanning the results
 
-#### Simple scanning
+### Simple scanning
 
 You'll likely have the best experience using [ripgrep](https://github.com/BurntSushi/ripgrep) to search for files. It's available via package managers for macOS, Linux, and Windows, and it's just about the fastest tool available for regex searching across a large number of files.
 
@@ -52,7 +49,13 @@ Examples:
 rg --type php 'rest_get_date_with_gmt' plugins
 ```
 
-#### Advanced scanning
+### Finding files
+
+```sh
+find plugins -name 'foo.php'
+```
+
+### Advanced scanning
 
 It's possible to perform more powerful searches that are aware of language syntax and semantics using [Semgrep](https://github.com/semgrep/semgrep). It's available via package managers or via Docker. You don't need to sign into the Semgrep Code service on the CLI despite what its documentation says.
 
@@ -64,7 +67,7 @@ Examples:
 semgrep -e 'printf(esc_attr__(...), ...)' --lang=php --no-git-ignore plugins
 ```
 
-#### Generating scan summaries
+### Generating scan summaries
 
 This repository also includes a script to show a summary of a scan.  For example:
 
@@ -97,8 +100,7 @@ Matches  Slug  Active installs
       5  nightly             -
 ```
 
-FAQ
-----
+## FAQ
 
 ### What can I use this for?
 
@@ -125,7 +127,7 @@ initial sync.
 
 ### How much disk space do I need?
 
-As of March 2024:
+As of August 2024:
 
 * Around 12 GB of disk space for plugins
 * Around 3 GB of disk space for themes
@@ -146,14 +148,13 @@ tasks being executed by this tool:
 watch -n .5 "pstree -pa `pgrep -f '^xargs -n 1 -P .+ ./download'`"
 ```
 
-Many thanks
------------
+## Many thanks
 
 This is an adaptation of [the WordPress Plugin Directory Slurper](https://github.com/markjaquith/WordPress-Plugin-Directory-Slurper) by Mark Jaquith. The majority of the code was originally written by Mark and the other contributors to that library. If you need the entire plugin directory rather than just those with at least 10,000 active installations, then use that instead.
 
-Copyright & License
--------------------
-Copyright &copy; 2011-2020 Mark Jaquith, 2024 John Blackbourn
+## Copyright & License
+
+Copyright © 2011-2020 Mark Jaquith, 2024 John Blackbourn
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
