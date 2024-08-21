@@ -33,7 +33,12 @@ Run this from within the `slurpetta` directory:
 ./update core
 ```
 
-The `plugins` and `themes` directories will contain all the plugins and themes when the script is done. In addition, the `popular` directory will contain symlinks to all plugins with over 1M active installations, and the `top` directory will contain symlinks to all plugins with over 5M active installations. The `core` directory will contain the latest release of WordPress core.
+When the script is done:
+
+* The `plugins` and `themes` directories contain all the plugins and themes
+* The `popular` directory contains symlinks to all plugins with over 1M active installations
+* The `top` directory contains symlinks to all plugins with over 5M active installations
+* The `core` directory contains the latest release of WordPress core
 
 ### Scanning the results
 
@@ -94,6 +99,12 @@ Matches  Slug  Active installs
 
 FAQ
 ----
+
+### What can I use this for?
+
+* Scanning (SAST)
+* Producing stats
+* Training an LLM
 
 ### Why download the zip files? Why not use SVN?
 
