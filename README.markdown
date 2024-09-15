@@ -16,7 +16,7 @@ Really handy for doing local searches across popular WordPress plugins, themes, 
 
 ## Requirements
 
-* Unix system (tested on Mac OS X and Linux)
+* Unix system (tested on macOS and Linux)
 * PHP 8.0 or higher
 * `wget` and `svn` command-line executables installed
 
@@ -65,6 +65,19 @@ Examples:
 
 ```sh
 semgrep -e 'printf(esc_attr__(...), ...)' --lang=php --no-git-ignore plugins
+```
+
+There is a built-in ruleset for PHP that you can use, but running it across all plugins will give you a very large number of results so you may want to restrict it to a sub-directory or a single plugin.
+
+```sh
+semgrep --config "p/php" --no-git-ignore plugins/a
+semgrep --config "p/php" --no-git-ignore plugins/a/akismet
+```
+
+There is also a built-in ruleset specifically for vulnerabilities in WordPress code. You can scan all the plugins with this rule because at the time of writing it only shows around 50 results.
+
+```sh
+semgrep --config "p/wordpress" --no-git-ignore plugins
 ```
 
 ### Generating scan summaries
