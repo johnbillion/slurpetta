@@ -7,7 +7,7 @@ version of:
 * Every theme in the WordPress.org directory with at least 1,000 active installations
 * WordPress core latest and nightly
 
-As of August 2024 this is **around 2,500 plugins** and **700** themes.
+As of May 2025 this is **around 2,400 plugins** and **600** themes.
 
 Slurping and updating just these plugins and themes is at least 20x faster and smaller than
 slurping the entire plugin and theme repos which would otherwise total over 100,000 items.
@@ -140,7 +140,7 @@ initial sync.
 
 ### How much disk space do I need?
 
-As of August 2024:
+As of May 2025:
 
 * Around 12 GB of disk space for plugins
 * Around 3 GB of disk space for themes
@@ -167,7 +167,7 @@ This is an adaptation of [the WordPress Plugin Directory Slurper](https://github
 
 ## Copyright & License
 
-Copyright © 2011-2020 Mark Jaquith, 2024 John Blackbourn
+Copyright © 2011-2020 Mark Jaquith, 2024-2025 John Blackbourn
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
